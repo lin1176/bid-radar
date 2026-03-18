@@ -287,4 +287,46 @@ if submitted and tender_text:
             """, unsafe_allow_html=True)
 
         # === 详情分析 ===
-        st.markdown("<br>", 
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("🔍 四维深度拆解")
+        
+        row1 = st.columns(2)
+        row2 = st.columns(2)
+        
+        analysis_items = result.get('analysis', [])
+        for i, item in enumerate(analysis_items):
+            col = row1[i] if i < 2 else row2[i-2]
+            with col:
+                st.markdown(f"""
+                <div class="analysis-card">
+                    <h4 style="color: {theme_color}; margin: 0 0 10px 0;">{item['title']}</h4>
+                    <p style="color: #DDD; font-size: 14px; margin: 0;">{item['content']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # === 转化钩子 (高级版) ===
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(90deg, #1E1E1E 0%, #2D2D2D 100%); 
+            padding: 30px; 
+            border-radius: 15px; 
+            border: 1px solid {theme_color}; 
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        ">
+            <h2 style="color: {theme_color}; margin-top: 0;">🔓 解锁高阶情报？</h2>
+            <p style="color: #CCC; font-size: 16px;">本报告基于公开文本分析。如需获取<b>【该项目竞争对手历史报价数据】</b>及<b>【详细内定评分标准审计】</b>，请联系人工顾问。</p>
+            <div style="margin-top: 20px;">
+                <span style="background: {theme_color}; color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer;">
+                    ¥29.9 / 份深度报告 · 点击联系
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif submitted and not tender_text:
+    st.toast("⚠️ 请先粘贴招标公告内容！", icon="⚠️")
+
+# 底部版权
+st.markdown("<br><br><br><p style='text-align: center; color: #444; font-size: 12px;'>© 2026 中标雷达系统 | Powered by DeepSeek & Python</p>", unsafe_allow_html=True)
