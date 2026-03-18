@@ -18,6 +18,7 @@ st.set_page_config(
 # ================= 2. 核心 CSS =================
 st.markdown("""
 <style>
+    /* 1. 全局容器调整 */
     .block-container {
         padding-top: 2rem !important;
         padding-bottom: 3rem !important;
@@ -28,6 +29,8 @@ st.markdown("""
         background-color: #F1F5F9;
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
+
+    /* 2. 顶部导航 */
     .top-bar {
         background: #0F172A;
         color: white;
@@ -54,6 +57,8 @@ st.markdown("""
         70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
         100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
     }
+
+    /* 3. 卡片与字体 */
     .data-card {
         background: white;
         border: 1px solid #E2E8F0;
@@ -62,7 +67,6 @@ st.markdown("""
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         height: 100%;
     }
-    .metric-box { text-align: center; border-right: 1px solid #E2E8F0; }
     .metric-label { font-size: 12px; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .metric-value { font-size: 28px; font-weight: 800; color: #0F172A; }
     .blur-text {
@@ -77,6 +81,8 @@ st.markdown("""
         font-size: 13px;
         font-family: monospace;
     }
+    
+    /* 4. 按钮 */
     div.stButton > button {
         background: #2563EB;
         color: white;
@@ -87,6 +93,8 @@ st.markdown("""
         width: 100%;
     }
     div.stButton > button:hover { background: #1D4ED8; }
+    
+    /* 5. 警告框 */
     .audit-alert {
         padding: 10px;
         border-left: 4px solid #DC2626;
@@ -95,9 +103,10 @@ st.markdown("""
         font-size: 13px;
         margin-bottom: 5px;
     }
-    /* 底部日志样式优化：强制不换行，更加紧凑 */
+
+    /* 6. 底部日志 - 核心修改区 */
     .case-study-box {
-        background: #0F172A; /* 改为深色背景，更像黑客终端 */
+        background: #0F172A; /* 深色黑客背景 */
         border: 1px solid #334155;
         padding: 15px;
         margin-top: 30px;
@@ -111,9 +120,9 @@ st.markdown("""
         border-bottom: 1px dashed #334155;
         padding: 8px 0;
         display: flex; 
-        flex-direction: row; /* 强制横向排列 */
+        flex-direction: row;
         align-items: flex-start;
-        line-height: 1.4;
+        line-height: 1.5;
     }
     .log-time {
         color: #22C55E; /* 绿色时间戳 */
@@ -122,20 +131,21 @@ st.markdown("""
         font-weight: bold;
     }
     .log-tag {
-        padding: 1px 6px;
+        padding: 1px 8px;
         border-radius: 2px;
         font-size: 10px;
         margin-right: 12px;
         font-weight: bold;
-        min-width: 80px;
+        min-width: 85px;
         text-align: center;
         display: inline-block;
+        letter-spacing: 0.5px;
     }
-    /* 定义不同标签的颜色 */
-    .tag-risk { background: #7F1D1D; color: #FCA5A5; border: 1px solid #991B1B; }
-    .tag-sync { background: #14532D; color: #86EFAC; border: 1px solid #166534; }
-    .tag-pass { background: #1E3A8A; color: #93C5FD; border: 1px solid #1E40AF; }
-    .tag-warn { background: #713F12; color: #FDE047; border: 1px solid #854D0E; }
+    /* 标签颜色定义 */
+    .tag-risk { background: #450a0a; color: #fecaca; border: 1px solid #7f1d1d; } /* 深红 */
+    .tag-sync { background: #052e16; color: #86efac; border: 1px solid #14532d; } /* 深绿 */
+    .tag-pass { background: #172554; color: #bfdbfe; border: 1px solid #1e3a8a; } /* 深蓝 */
+    .tag-warn { background: #422006; color: #fde047; border: 1px solid #713f12; } /* 深黄 */
 </style>
 """, unsafe_allow_html=True)
 
@@ -157,10 +167,10 @@ with st.sidebar:
 
 # ================= 4. 业务逻辑 =================
 
-# --- 动态日志生成器 (核心：利用人性) ---
+# --- 动态日志生成器 (核心：利用人性 + 避免重复) ---
 def get_random_log_data():
-    # 1. 城市/区域列表 (显得覆盖面广)
-    cities = ["成都市", "武汉市", "西安市", "广州市", "雄安新区", "苏州市", "重庆市", "杭州市", "南京市", "合肥市"]
+    # 1. 城市/区域列表
+    cities = ["成都市", "武汉市", "西安市", "广州市", "雄安新区", "苏州市", "重庆市", "杭州市", "南京市", "合肥市", "郑州市", "长沙市"]
     
     # 2. 诱导性事件模板 (直击痛点)
     templates = [
@@ -187,6 +197,10 @@ def get_random_log_data():
         {
             "tag": "COMPETITOR", "style": "tag-warn",
             "msg": "检测到{city}常驻中标单位（{company_type}）近期信用分下降，该项目存在捡漏机会。"
+        },
+        {
+            "tag": "BID_FORECAST", "style": "tag-pass",
+            "msg": "AI 预测：{city}下季度市政类项目发标量将增长 {rate}%，建议提前储备资质。"
         }
     ]
     
@@ -195,14 +209,17 @@ def get_random_log_data():
     company_types = ["国企三级子公司", "园林绿化龙头", "科技大厂", "地方城投", "系统集成商"]
     
     logs = []
-    # 生成当前北京时间
-    bj_now = datetime.utcnow() + timedelta(hours=8)
     
-    # 生成 4-5 条随机日志
-    for i in range(5):
-        t = templates[random.randint(0, len(templates)-1)]
-        # 时间倒推：最近的一条是几秒前，最远的是几十市政前
-        log_time = (bj_now - timedelta(minutes=random.randint(1, 40), seconds=random.randint(0, 59))).strftime("%H:%M:%S")
+    # 【核心逻辑修改】计算时间：北京时间 (UTC+8) 再减去 1 小时 = UTC+7
+    target_time_base = datetime.utcnow() + timedelta(hours=7)
+    
+    # 【核心逻辑修改】随机选取 5 个 *不重复* 的模板，避免 continuous PRICE_OPT
+    selected_templates = random.sample(templates, 5)
+    
+    # 生成日志
+    for t in selected_templates:
+        # 时间倒推：在当前目标时间的基础上，随机回溯 1-50 分钟
+        log_time = (target_time_base - timedelta(minutes=random.randint(1, 50), seconds=random.randint(0, 59))).strftime("%H:%M:%S")
         
         # 填充文案
         message = t["msg"].format(
@@ -435,26 +452,24 @@ if submitted:
 # === 新增：底部实时动态 (完全重写的动态日志) ===
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 生成动态日志HTML字符串
+# 生成动态日志数据
 log_data = get_random_log_data()
+
+# 【关键修复】构建 HTML 字符串时，使用单行或无缩进字符串，防止 Markdown 误判为代码块
 logs_html = ""
 for log in log_data:
-    logs_html += f"""
-    <div class="case-item">
-        <span class="log-time">[{log['time']}]</span> 
-        <span class="log-tag {log['style']}">{log['tag']}</span> 
-        <span>{log['msg']}</span>
-    </div>
-    """
+    # 注意：这里是紧凑拼接，没有缩进
+    logs_html += f"""<div class="case-item"><span class="log-time">[{log['time']}]</span><span class="log-tag {log['style']}">{log['tag']}</span><span>{log['msg']}</span></div>"""
 
 # 渲染底部日志容器
-bj_sync_time = (datetime.utcnow() + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
+# 显示用的系统时间也调整为 UTC+7
+display_sync_time = (datetime.utcnow() + timedelta(hours=7)).strftime("%Y-%m-%d %H:%M:%S")
 
 st.markdown(f"""
 <div class="case-study-box">
 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:8px; margin-bottom:10px;">
     <div style="font-weight:bold; color:#E2E8F0; font-size:14px;">📡 全网实时风险/机会监测 (Live Monitor)</div>
-    <div style="color:#22C55E; font-size:12px;">● Online | Beijing Time (UTC+8)</div>
+    <div style="color:#22C55E; font-size:12px;">● Online | System Time: UTC+7</div>
 </div>
 {logs_html}
 <div style="margin-top:10px; font-size:11px; color:#64748B; text-align:right;">
@@ -464,4 +479,4 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 底部状态
-st.markdown(f"<br><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X{random.randint(1000,9999)}-AF | 上次数据同步: {bj_sync_time} | SSL 安全加密连接</div>", unsafe_allow_html=True)
+st.markdown(f"<br><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X{random.randint(1000,9999)}-AF | 上次数据同步: {display_sync_time} | SSL 安全加密连接</div>", unsafe_allow_html=True)
