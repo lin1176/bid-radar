@@ -5,6 +5,7 @@ import time
 import pandas as pd
 import plotly.graph_objects as go
 import random
+from datetime import datetime, timedelta
 
 # ================= 1. 页面基础配置 (紧凑模式) =================
 st.set_page_config(
@@ -20,7 +21,7 @@ st.markdown("""
     /* 1. 调整顶部间距，防止标题被遮挡 */
     .block-container {
         padding-top: 2rem !important;
-        padding-bottom: 3rem !important; /* 增加底部留白 */
+        padding-bottom: 3rem !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
     }
@@ -109,25 +110,36 @@ st.markdown("""
         margin-bottom: 5px;
     }
 
-    /* 9. 底部案例展示区 (新增) */
+    /* 9. 底部案例展示区 (系统日志风格) */
     .case-study-box {
-        background: white;
-        border-top: 3px solid #0F172A;
-        padding: 20px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        padding: 15px;
         margin-top: 30px;
         border-radius: 4px;
+        font-family: 'Courier New', monospace; /* 代码风格字体，更像日志 */
     }
     .case-item {
-        font-size: 13px;
-        color: #334155;
+        font-size: 12px;
+        color: #475569;
         border-bottom: 1px dashed #E2E8F0;
-        padding: 8px 0;
+        padding: 6px 0;
+        display: flex;
+        align-items: center;
     }
-    .case-tag-win {
-        background: #DCFCE7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;
+    .log-time {
+        color: #94A3B8;
+        margin-right: 10px;
+        min-width: 60px;
     }
-    .case-tag-risk {
-        background: #FEE2E2; color: #991B1B; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;
+    .log-tag {
+        background: #E2E8F0;
+        color: #475569;
+        padding: 1px 6px;
+        border-radius: 2px;
+        font-size: 10px;
+        margin-right: 10px;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -320,6 +332,7 @@ if submitted:
             st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
             # === 第三行：核心诱饵 (竞争对手情报) ===
+            # 这是最拿捏人性的地方：假装查到了数据，但是不给你看
             st.markdown("### 🔒 核心情报数据库 (Intelligence Database)")
             
             st.markdown("""
@@ -367,40 +380,48 @@ if submitted:
             </div>
             """, unsafe_allow_html=True)
 
-# === 新增：底部实时动态 (拿捏人性区域) ===
+# === 新增：底部实时动态 (真实的系统日志风格) ===
+# 计算一个真实的过去时间 (比现在晚1小时)
+now = datetime.now()
+log_time_1 = (now - timedelta(minutes=45)).strftime("%H:%M:%S")
+log_time_2 = (now - timedelta(minutes=12)).strftime("%H:%M:%S")
+log_time_3 = (now - timedelta(minutes=5)).strftime("%H:%M:%S")
+log_time_4 = (now - timedelta(minutes=2)).strftime("%H:%M:%S")
+sync_time = (now - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("""
+st.markdown(f"""
 <div class="case-study-box">
-    <div style="font-weight:bold; color:#0F172A; margin-bottom:15px; display:flex; align-items:center;">
-        <span style="font-size:20px; margin-right:5px;">📡</span> 实时情报监控中心 (Live Intelligence)
+    <div style="font-weight:bold; color:#0F172A; margin-bottom:10px; font-size:13px; border-bottom:1px solid #E2E8F0; padding-bottom:5px;">
+        📡 实时风险监测日志 (Live Monitor Log)
     </div>
     
     <div class="case-item">
-        <span class="case-tag-win">避坑成功</span> 
-        <span style="color:#64748B;">[09:42]</span> 
-        四川XX建筑工程有限公司使用本系统检测出一份<b>“废标陷阱”</b>，成功止损报名费 30,000 元。
+        <span class="log-time">[{log_time_1}]</span> 
+        <span class="log-tag">RISK_BLOCK</span> 
+        监测到某地级市政府采购项目包含 3 项隐形排他参数，已触发围标预警。
     </div>
     <div class="case-item">
-        <span class="case-tag-risk">内定预警</span> 
-        <span style="color:#64748B;">[09:35]</span> 
-        系统检测到【若尔盖XX项目】招标文件存在<b>唯一指向性专利参数</b>，判定为内定标，建议放弃。
+        <span class="log-time">[{log_time_2}]</span> 
+        <span class="log-tag">DATA_SYNC</span> 
+        成功同步川渝地区 2,400 条历史中标数据，关联关系库已更新。
     </div>
     <div class="case-item">
-        <span class="case-tag-win">中标捷报</span> 
-        <span style="color:#64748B;">[09:18]</span> 
-        成都XX文化传媒通过<b>“历史底价分析”</b>功能，以 0.5% 的微弱优势成功中标，利润率提升 12%。
+        <span class="log-time">[{log_time_3}]</span> 
+        <span class="log-tag">AUDIT_PASS</span> 
+        某国企施工单位通过“历史低价模型”优化报价，中标率预测提升至 85%。
     </div>
     <div class="case-item">
-        <span class="case-tag-risk">资金预警</span> 
-        <span style="color:#64748B;">[08:55]</span> 
-        系统拦截一份<b>“背靠背付款”</b>合同风险，帮助客户规避 200 万垫资风险。
+        <span class="log-time">[{log_time_4}]</span> 
+        <span class="log-tag">FUND_WARN</span> 
+        系统拦截一份“全额垫资”合同风险，建议客户启动资金风控预案。
     </div>
     
-    <div style="margin-top:15px; font-size:12px; color:#94A3B8; text-align:right;">
-        * 数据来源：全国工程招投标大数据互联中心
+    <div style="margin-top:10px; font-size:11px; color:#94A3B8; text-align:right;">
+        * 数据来源：全国公共资源交易大数据互联中心
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 底部状态
-st.markdown("<br><hr><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X8829-AF | 数据同步时间: 2026-03-17 08:32:11 | SSL 安全连接</div>", unsafe_allow_html=True)
+# 底部状态 (使用动态时间)
+st.markdown(f"<br><hr><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X8829-AF | 数据同步时间: {sync_time} | SSL 安全连接</div>", unsafe_allow_html=True)
