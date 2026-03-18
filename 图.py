@@ -5,7 +5,7 @@ import time
 import pandas as pd
 import plotly.graph_objects as go
 
-# ================= 页面配置 =================
+# ================= 1. 页面基础配置 =================
 st.set_page_config(
     page_title="中标雷达 | 招投标风险智能预警系统",
     page_icon="🛡️",
@@ -13,61 +13,109 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ================= 自定义 CSS (美化) =================
+# ================= 2. 高级 CSS 美化 (核心升级) =================
 st.markdown("""
 <style>
-    /* 全局字体 */
+    /* 全局背景色与字体 */
     .stApp {
         background-color: #0E1117;
-        color: #FAFAFA;
+        color: #E0E0E0;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
-    /* 标题样式 */
-    h1 {
-        color: #FF4B4B;
+    
+    /* 标题渐变色特效 */
+    .gradient-text {
+        background: -webkit-linear-gradient(45deg, #FF4B4B, #FF914D);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        font-size: 3rem;
         text-align: center;
-        font-weight: 800;
+        margin-bottom: 0.5rem;
     }
-    h3 {
-        color: #FAFAFA;
+    
+    /* 副标题 */
+    .subtitle {
+        text-align: center;
+        color: #888;
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
     }
-    /* 风险分数字体 */
-    .risk-score {
-        font-size: 80px;
+
+    /* 修复按钮显示问题：强制设置按钮背景色和文字颜色 */
+    div.stButton > button {
+        background: linear-gradient(45deg, #FF4B4B, #D32F2F);
+        color: white !important;
+        border: none;
+        padding: 0.6rem 2rem;
+        font-size: 1.2rem;
         font-weight: bold;
-        text-align: center;
-        margin-bottom: 0px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4);
+        width: 100%;
     }
-    /* 卡片背景 */
-    .stCard {
+    
+    /* 按钮悬停特效 */
+    div.stButton > button:hover {
+        background: linear-gradient(45deg, #FF6B6B, #E53935);
+        box-shadow: 0 6px 20px rgba(255, 75, 75, 0.6);
+        transform: translateY(-2px);
+        color: white !important; /* 确保悬停时文字也是白色 */
+    }
+
+    /* 风险分数字体优化 */
+    .risk-score-container {
+        text-align: center;
+        padding: 20px;
+        background: #1F2229;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        border: 1px solid #333;
+    }
+    .risk-score {
+        font-size: 5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    
+    /* 输入框样式微调 */
+    .stTextInput>div>div>input {
         background-color: #262730;
+        color: white;
+        border: 1px solid #444;
+    }
+    .stTextArea>div>div>textarea {
+        background-color: #262730;
+        color: white;
+        border: 1px solid #444;
+    }
+    
+    /* 分析卡片样式 */
+    .analysis-card {
+        background-color: #1F2229;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
-    /* 按钮样式 */
-    .stButton>button {
-        width: 100%;
-        background-color: #FF4B4B;
-        color: white;
-        font-size: 20px;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 10px;
-    }
-    .stButton>button:hover {
-        background-color: #FF2B2B;
-        border-color: #FF2B2B;
+        border-left: 4px solid #FF4B4B;
+        margin-bottom: 15px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ================= API 配置 =================
-API_KEY = "sk-27a7c7432aab446cb506e9da2083e04d"
+# ================= 3. API 配置 =================
+# 注意：正式部署时建议使用 st.secrets，本地运行时可直接写 Key
+# 如果你已经配置了 .streamlit/secrets.toml，请使用 st.secrets["DEEPSEEK_API_KEY"]
+try:
+    API_KEY = st.secrets["DEEPSEEK_API_KEY"]
+except:
+    API_KEY = "sk-27a7c7432aab446cb506e9da2083e04d" # 本地备用
+
 BASE_URL = "https://api.deepseek.com"
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
-
-# ================= 核心分析函数 =================
+# ================= 4. 核心逻辑函数 =================
 def analyze_risk(text):
     """调用 DeepSeek 进行深度风险评估"""
     system_prompt = """
@@ -83,10 +131,10 @@ def analyze_risk(text):
             "payment_score": (0-100, 回款风险/付款条件)
         },
         "analysis": [
-            {"title": "时间陷阱", "content": "分析工期和截标时间"},
-            {"title": "利润陷阱", "content": "分析预算与成本匹配度"},
-            {"title": "内定嫌疑", "content": "分析特定参数或排他性条款"},
-            {"title": "回款毒药", "content": "分析付款比例和验收标准"}
+            {"title": "⏳ 时间陷阱", "content": "简练分析工期和截标时间"},
+            {"title": "💸 利润陷阱", "content": "简练分析预算与成本匹配度"},
+            {"title": "🎯 内定嫌疑", "content": "简练分析特定参数或排他性条款"},
+            {"title": "💳 回款毒药", "content": "简练分析付款比例和验收标准"}
         ],
         "verdict": "一句话犀利点评（如：典型的低价陪跑局，建议直接放弃）"
     }
@@ -106,48 +154,53 @@ def analyze_risk(text):
     except Exception as e:
         return {"error": str(e)}
 
+# ================= 5. 页面布局 =================
 
-# ================= 页面布局 =================
-
-# 1. 顶部 Header
-st.markdown("<h1>🛡️ 中标雷达 · 招投标风险预警系统</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #888;'>🚫 拒绝陪跑 | 💰 避免亏损 | 🔍 识别内定</p>",
-            unsafe_allow_html=True)
+# --- 标题区 ---
+st.markdown("<div class='gradient-text'>🛡️ 中标雷达 · 智能预警系统</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>大数据风控引擎 | 识别内定 · 规避亏损 · 拒绝陪跑</div>", unsafe_allow_html=True)
 st.divider()
 
-# 2. 输入区域 (左右分栏，左边输入，右边说明)
-col1, col2 = st.columns([2, 1])
+# --- 输入区 ---
+col_input, col_tips = st.columns([2, 1])
 
-with col1:
+with col_input:
     with st.form("analysis_form"):
-        st.subheader("📝 项目信息录入")
+        st.markdown("### 📝 项目情报录入")
         project_name = st.text_input("项目名称（选填）", placeholder="例如：若尔盖湿地宣传片项目")
-        tender_text = st.text_area("📄 招标公告/采购需求（核心内容粘贴处）", height=250,
-                                   placeholder="请直接粘贴招标公告中的【项目概况】、【采购需求】、【评分标准】等核心文字...\n\n例如：\n预算金额：30万\n截止时间：3月26日\n要求：拍摄黑颈鹤繁衍镜头...")
+        tender_text = st.text_area("📄 招标公告/采购需求（核心情报粘贴处）", height=280,
+                                   placeholder="💡 智能分析需要以下信息：\n1. 预算金额（如：30万）\n2. 时间节点（获取文件及开标时间）\n3. 核心参数（如：指定品牌、特定证书）\n4. 付款方式（预付款比例）\n\n请直接粘贴公告原文...")
+        
+        # 这里的按钮现在会被 CSS 完美渲染为红色
+        submitted = st.form_submit_button("🚀 启动深度风险扫描")
 
-        submitted = st.form_submit_button("开始深度风险扫描")
-
-with col2:
-    st.info("💡 **如何使用？**")
-    st.markdown("""
-    1. 打开招标公告网页。
-    2. 复制**预算、时间、技术参数、付款方式**等关键段落。
-    3. 粘贴到左侧文本框。
-    4. 点击“开始扫描”。
+with col_tips:
+    st.markdown("### 💡 使用指南")
+    st.info("""
+    **仅需三步，识破标书陷阱：**
+    
+    1. **复制**：打开招标公告，复制核心段落。
+    2. **粘贴**：将内容粘贴到左侧文本框。
+    3. **扫描**：AI 将在 5 秒内输出体检报告。
     """)
-    st.warning("⚠️ **注意：**\n本系统基于  大数据模型，仅供商业参考，不构成法律建议。")
+    st.markdown("""
+    <div style="background-color:#262730; padding:15px; border-radius:10px; font-size:14px; color:#888;">
+    ⚠️ <b>免责声明：</b><br>
+    本系统基于大语言模型逻辑推理，结果仅供商业决策参考，不构成法律效力。
+    </div>
+    """, unsafe_allow_html=True)
 
-# 3. 结果展示区域
+# --- 结果展示区 ---
 if submitted and tender_text:
-    # 进度条动画，增加科技感
-    with st.status("🤖 AI 正在接入风控大脑...", expanded=True) as status:
+    # 动态加载效果
+    with st.status("🤖 风控大脑正在高速运转...", expanded=True) as status:
         st.write("🔍 正在扫描时间陷阱...")
-        time.sleep(1)
+        time.sleep(0.5)
         st.write("💰 正在核算隐形成本...")
-        time.sleep(1)
+        time.sleep(0.5)
         st.write("⚖️ 正在比对排他性条款...")
         time.sleep(0.5)
-
+        
         # 调用 API
         result = analyze_risk(tender_text)
         status.update(label="✅ 分析完成！", state="complete", expanded=False)
@@ -155,93 +208,83 @@ if submitted and tender_text:
     if "error" in result:
         st.error(f"分析失败，请稍后重试。错误信息：{result['error']}")
     else:
-        st.divider()
+        st.markdown("---")
+        
+        # 解析数据
+        score = result.get('total_score', 0)
+        level = result.get('risk_level', '未知')
+        
+        # 动态颜色逻辑
+        if score >= 80:
+            theme_color = "#FF4B4B" # 红色
+        elif score >= 50:
+            theme_color = "#FFA500" # 橙色
+        else:
+            theme_color = "#00CC96" # 绿色
 
-        # === 核心指标看板 ===
-        score = result['total_score']
-        level = result['risk_level']
-
-        # 动态颜色
-        score_color = "#FF4B4B" if score > 70 else "#FFA500" if score > 40 else "#00CC96"
-
-        c1, c2, c3 = st.columns([1.5, 2, 1.5])
-
+        # === 核心看板 ===
+        c1, c2, c3 = st.columns([1, 1.5, 1])
+        
         with c1:
-            # 显示大大的分数
-            st.markdown(f"<div style='text-align: center; color: #888;'>风险综合指数</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='risk-score' style='color: {score_color};'>{score}</div>", unsafe_allow_html=True)
-            st.markdown(
-                f"<div style='text-align: center; font-size: 24px; font-weight: bold; background-color: {score_color}; border-radius: 5px; padding: 5px;'>{level}</div>",
-                unsafe_allow_html=True)
+            # 分数展示卡片
+            st.markdown(f"""
+            <div class="risk-score-container">
+                <div style="color: #888; margin-bottom: 5px;">综合风险指数</div>
+                <div class="risk-score" style="color: {theme_color};">{score}</div>
+                <div style="background: {theme_color}; color: black; font-weight: bold; padding: 5px 15px; border-radius: 20px; display: inline-block;">
+                    {level}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with c2:
-            # 雷达图 (Plotly)
+            # 高级雷达图 (Plotly)
             categories = ['时间风险', '预算风险', '参数排他', '回款风险']
             values = [
-                result['dimensions']['time_score'],
-                result['dimensions']['budget_score'],
-                result['dimensions']['param_score'],
-                result['dimensions']['payment_score']
+                result['dimensions'].get('time_score', 0),
+                result['dimensions'].get('budget_score', 0),
+                result['dimensions'].get('param_score', 0),
+                result['dimensions'].get('payment_score', 0)
             ]
-
+            
             fig = go.Figure(data=go.Scatterpolar(
                 r=values,
                 theta=categories,
                 fill='toself',
-                line_color=score_color
+                name='风险维度',
+                line_color=theme_color,
+                fillcolor=f"rgba({int(theme_color[1:3], 16)}, {int(theme_color[3:5], 16)}, {int(theme_color[5:7], 16)}, 0.3)", # 动态半透明填充
+                marker=dict(color=theme_color)
             ))
+            
             fig.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                polar=dict(
+                    radialaxis=dict(visible=True, range=[0, 100], showticklabels=False, linecolor='#444'),
+                    angularaxis=dict(tickfont=dict(size=14, color='#EEE'), linecolor='#444'),
+                    bgcolor='#1F2229'
+                ),
                 showlegend=False,
                 margin=dict(l=40, r=40, t=20, b=20),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="white")
+                height=300
             )
             st.plotly_chart(fig, use_container_width=True)
 
         with c3:
-            st.markdown("### 🤖 AI 犀利点评")
-            st.info(f"“{result['verdict']}”")
-            if score > 60:
-                st.error("🛑 建议操作：止损放弃 / 谨慎陪跑")
-            else:
-                st.success("✅ 建议操作：积极争取 / 正常投标")
+            # AI 点评卡片
+            st.markdown(f"""
+            <div style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                <div style="background: #1F2229; padding: 20px; border-radius: 15px; border-left: 5px solid {theme_color};">
+                    <h3 style="margin-top:0;">🤖 AI 犀利点评</h3>
+                    <p style="font-size: 16px; line-height: 1.6;">“{result.get('verdict', '暂无点评')}”</p>
+                    <hr style="border-color: #333;">
+                    <div style="font-weight: bold; color: {theme_color};">
+                        { "🛑 建议操作：止损放弃" if score > 60 else "✅ 建议操作：可以尝试" }
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.divider()
-
-        # === 深度分析详情 ===
-        st.subheader("🔍 四维深度拆解")
-
-        row1 = st.columns(2)
-        row2 = st.columns(2)
-
-        # 为了美观，用卡片形式展示
-        for i, item in enumerate(result['analysis']):
-            # 动态决定放在哪一行
-            col = row1[i] if i < 2 else row2[i - 2]
-            with col:
-                with st.container(border=True):
-                    st.markdown(f"#### {item['title']}")
-                    st.write(item['content'])
-
-        # === 引导转化钩子 (Monetization Hook) ===
-        st.divider()
-        st.markdown("""
-        <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px; border: 1px solid #FF4B4B; text-align: center;">
-            <h3 style="color: #FF4B4B;">🔓 解锁更高阶情报？</h3>
-            <p style="color: #CCC;">本报告基于公开文本分析。如需获取<b>【该项目竞争对手历史报价数据】</b>及<b>【详细内定评分标准审计】</b>，请联系人工顾问。</p>
-            <p style="font-size: 14px; color: #888;">限时优惠：¥29.9 / 份深度报告</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # 这里可以放你的二维码图片
-        # st.image("your_qr_code.png", width=200)
-
-elif submitted and not tender_text:
-    st.warning("⚠️ 请先粘贴招标公告内容！")
-
-# 底部版权
-st.markdown(
-    "<br><br><hr><p style='text-align: center; color: #555;'>© 2026 中标雷达系统 | Powered by  & Python</p>",
-    unsafe_allow_html=True)
+        # === 详情分析 ===
+        st.markdown("<br>", 
