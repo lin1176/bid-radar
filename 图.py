@@ -125,7 +125,7 @@ with col1:
         tender_text = st.text_area("📄 招标公告/采购需求（核心内容粘贴处）", height=250,
                                    placeholder="请直接粘贴招标公告中的【项目概况】、【采购需求】、【评分标准】等核心文字...\n\n例如：\n预算金额：30万\n截止时间：3月26日\n要求：拍摄黑颈鹤繁衍镜头...")
 
-        submitted = st.form_submit_button("🚀 开始深度风险扫描")
+        submitted = st.form_submit_button("开始深度风险扫描")
 
 with col2:
     st.info("💡 **如何使用？**")
@@ -243,5 +243,5 @@ elif submitted and not tender_text:
 
 # 底部版权
 st.markdown(
-    "<br><br><hr><p style='text-align: center; color: #555;'>© 2026 中标雷达系统 | Powered by DeepSeek & Python</p>",
+    "<br><br><hr><p style='text-align: center; color: #555;'>© 2026 中标雷达系统 | Powered by  & Python</p>",
     unsafe_allow_html=True)
