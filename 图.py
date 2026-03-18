@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import random
 from datetime import datetime, timedelta
 
-# ================= 1. 页面基础配置 (紧凑模式) =================
+# ================= 1. 页面基础配置 =================
 st.set_page_config(
     page_title="工程大数据标前审计终端",
     page_icon="🛡️",
@@ -15,26 +15,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ================= 2. 核心 CSS (修复遮挡问题) =================
+# ================= 2. 核心 CSS =================
 st.markdown("""
 <style>
-    /* 1. 调整顶部间距，防止标题被遮挡 */
     .block-container {
         padding-top: 2rem !important;
         padding-bottom: 3rem !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
     }
-    
-    /* 2. 背景与字体：专业数据终端风格 */
     .stApp {
-        background-color: #F1F5F9; /* 高级灰 */
+        background-color: #F1F5F9;
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-
-    /* 3. 顶部导航栏模拟 */
     .top-bar {
-        background: #0F172A; /* 深蓝黑 */
+        background: #0F172A;
         color: white;
         padding: 15px 20px;
         border-radius: 8px;
@@ -52,9 +47,13 @@ st.markdown("""
         display: inline-block;
         margin-right: 5px;
         box-shadow: 0 0 5px #22C55E;
+        animation: pulse 2s infinite;
     }
-
-    /* 4. 卡片容器：高密度、细边框 */
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
     .data-card {
         background: white;
         border: 1px solid #E2E8F0;
@@ -63,16 +62,9 @@ st.markdown("""
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         height: 100%;
     }
-    
-    /* 5. 分数展示优化 */
-    .metric-box {
-        text-align: center;
-        border-right: 1px solid #E2E8F0;
-    }
+    .metric-box { text-align: center; border-right: 1px solid #E2E8F0; }
     .metric-label { font-size: 12px; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
     .metric-value { font-size: 28px; font-weight: 800; color: #0F172A; }
-    
-    /* 6. 模糊数据效果 (诱导付费的核心) */
     .blur-text {
         color: transparent;
         text-shadow: 0 0 8px rgba(0,0,0,0.5);
@@ -85,8 +77,6 @@ st.markdown("""
         font-size: 13px;
         font-family: monospace;
     }
-
-    /* 7. 按钮样式 */
     div.stButton > button {
         background: #2563EB;
         color: white;
@@ -96,11 +86,7 @@ st.markdown("""
         font-weight: 600;
         width: 100%;
     }
-    div.stButton > button:hover {
-        background: #1D4ED8;
-    }
-    
-    /* 8. 自定义 Alert */
+    div.stButton > button:hover { background: #1D4ED8; }
     .audit-alert {
         padding: 10px;
         border-left: 4px solid #DC2626;
@@ -109,42 +95,51 @@ st.markdown("""
         font-size: 13px;
         margin-bottom: 5px;
     }
-
-    /* 9. 底部案例展示区 (系统日志风格) */
+    /* 底部日志样式优化：强制不换行，更加紧凑 */
     .case-study-box {
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
+        background: #0F172A; /* 改为深色背景，更像黑客终端 */
+        border: 1px solid #334155;
         padding: 15px;
         margin-top: 30px;
         border-radius: 4px;
-        font-family: 'Courier New', monospace; /* 代码风格字体，更像日志 */
+        font-family: 'Courier New', monospace;
+        color: #E2E8F0;
     }
     .case-item {
         font-size: 12px;
-        color: #475569;
-        border-bottom: 1px dashed #E2E8F0;
-        padding: 6px 0;
-        display: flex;
-        align-items: center;
+        color: #94A3B8;
+        border-bottom: 1px dashed #334155;
+        padding: 8px 0;
+        display: flex; 
+        flex-direction: row; /* 强制横向排列 */
+        align-items: flex-start;
+        line-height: 1.4;
     }
     .log-time {
-        color: #94A3B8;
-        margin-right: 10px;
-        min-width: 70px; /* 稍微加宽以容纳时间 */
+        color: #22C55E; /* 绿色时间戳 */
+        margin-right: 12px;
+        min-width: 75px;
+        font-weight: bold;
     }
     .log-tag {
-        background: #E2E8F0;
-        color: #475569;
         padding: 1px 6px;
         border-radius: 2px;
         font-size: 10px;
-        margin-right: 10px;
+        margin-right: 12px;
         font-weight: bold;
+        min-width: 80px;
+        text-align: center;
+        display: inline-block;
     }
+    /* 定义不同标签的颜色 */
+    .tag-risk { background: #7F1D1D; color: #FCA5A5; border: 1px solid #991B1B; }
+    .tag-sync { background: #14532D; color: #86EFAC; border: 1px solid #166534; }
+    .tag-pass { background: #1E3A8A; color: #93C5FD; border: 1px solid #1E40AF; }
+    .tag-warn { background: #713F12; color: #FDE047; border: 1px solid #854D0E; }
 </style>
 """, unsafe_allow_html=True)
 
-# ================= 3. 侧边栏 (营造系统感) =================
+# ================= 3. 侧边栏 =================
 with st.sidebar:
     st.markdown("### 🎛️ 控制台 Control Panel")
     st.markdown("---")
@@ -161,10 +156,74 @@ with st.sidebar:
     st.info("当前版本：V5.2 Enterprise\n\n授权给：高级审计员")
 
 # ================= 4. 业务逻辑 =================
-# 获取北京时间 (UTC+8) 的辅助函数
-def get_beijing_time():
-    # 获取 UTC 时间并加 8 小时
-    return datetime.utcnow() + timedelta(hours=8)
+
+# --- 动态日志生成器 (核心：利用人性) ---
+def get_random_log_data():
+    # 1. 城市/区域列表 (显得覆盖面广)
+    cities = ["成都市", "武汉市", "西安市", "广州市", "雄安新区", "苏州市", "重庆市", "杭州市", "南京市", "合肥市"]
+    
+    # 2. 诱导性事件模板 (直击痛点)
+    templates = [
+        {
+            "tag": "RISK_BLOCK", "style": "tag-risk",
+            "msg": "监测到{city}某政采项目含“{param}”排他参数，系统已自动标记围标风险。"
+        },
+        {
+            "tag": "DATA_SYNC", "style": "tag-sync",
+            "msg": "从{city}公共资源交易网同步 {num} 条历史中标数据，关联图谱已更新。"
+        },
+        {
+            "tag": "INTEL_WARN", "style": "tag-warn",
+            "msg": "穿透分析发现：某{company_type}与 3 家陪标单位存在实控人关联，建议规避。"
+        },
+        {
+            "tag": "PRICE_OPT", "style": "tag-pass",
+            "msg": "基于历史低价模型，系统建议将{city}项目报价下浮率调整为 {rate}% 以提升中标率。"
+        },
+        {
+            "tag": "FUND_ALERT", "style": "tag-risk",
+            "msg": "拦截一份高风险合同：检测到“全额垫资”隐形条款，预估资金占用周期 > {days} 天。"
+        },
+        {
+            "tag": "COMPETITOR", "style": "tag-warn",
+            "msg": "检测到{city}常驻中标单位（{company_type}）近期信用分下降，该项目存在捡漏机会。"
+        }
+    ]
+    
+    # 3. 随机填充数据
+    params = ["特定品牌", "隐形门槛", "非标专利", "定制软著", "地域保护"]
+    company_types = ["国企三级子公司", "园林绿化龙头", "科技大厂", "地方城投", "系统集成商"]
+    
+    logs = []
+    # 生成当前北京时间
+    bj_now = datetime.utcnow() + timedelta(hours=8)
+    
+    # 生成 4-5 条随机日志
+    for i in range(5):
+        t = templates[random.randint(0, len(templates)-1)]
+        # 时间倒推：最近的一条是几秒前，最远的是几十市政前
+        log_time = (bj_now - timedelta(minutes=random.randint(1, 40), seconds=random.randint(0, 59))).strftime("%H:%M:%S")
+        
+        # 填充文案
+        message = t["msg"].format(
+            city=random.choice(cities),
+            param=random.choice(params),
+            num=random.randint(1200, 8500),
+            company_type=random.choice(company_types),
+            rate=round(random.uniform(2.5, 15.0), 1),
+            days=random.randint(180, 720)
+        )
+        
+        logs.append({
+            "time": log_time,
+            "tag": t["tag"],
+            "style": t["style"],
+            "msg": message
+        })
+    
+    # 按时间倒序排列 (最新的在最上面)
+    logs.sort(key=lambda x: x["time"], reverse=True)
+    return logs
 
 try:
     API_KEY = st.secrets["DEEPSEEK_API_KEY"]
@@ -209,7 +268,7 @@ def analyze_risk(unit_name, project_name, text):
 st.markdown("""
 <div class="top-bar">
     <div style="font-weight:bold; font-size:18px;">🛡️ 标前大数据风控审计终端 <span style="font-size:12px; opacity:0.7;">Pre-Bid Risk Audit Terminal</span></div>
-    <div style="font-size:13px;"><span class="status-dot"></span>系统运行正常 | 数据库延时: 12ms</div>
+    <div style="font-size:13px;"><span class="status-dot"></span>LIVE MONITORING | Latency: 12ms</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -221,7 +280,7 @@ with st.form("audit_form"):
     with c2:
         project_name = st.text_input("项目名称 (Project)", placeholder="输入项目名称")
     with c3:
-        st.write("") # 占位
+        st.write("") 
         st.write("") 
         submitted = st.form_submit_button("⚡ 立即审计 (Audit)")
     
@@ -253,11 +312,9 @@ if submitted:
         else:
             score = result.get('total_score', 0)
             level = result.get('risk_level', 'Evaluating')
-            
-            # 颜色定义
             color = "#DC2626" if score > 60 else "#059669"
             
-            # === 第一行：核心指标看板 (Dashboard) ===
+            # === 第一行：核心指标看板 ===
             st.markdown(f"### 📊 审计结果概览 (Audit Overview)")
             k1, k2, k3, k4 = st.columns(4)
             with k1:
@@ -277,7 +334,6 @@ if submitted:
                 </div>
                 """, unsafe_allow_html=True)
             with k3:
-                # 模拟数据
                 hist_count = random.randint(3, 12)
                 st.markdown(f"""
                 <div class="data-card" style="text-align:center;">
@@ -297,12 +353,10 @@ if submitted:
 
             st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
 
-            # === 第二行：雷达图 + 审计日志 (左右布局) ===
+            # === 第二行：雷达图 + 审计日志 ===
             r1, r2 = st.columns([1, 2])
-            
             with r1:
                 st.markdown("**风险基因图谱**")
-                # 雷达图
                 dims = result.get('dimensions', {})
                 fig = go.Figure(data=go.Scatterpolar(
                     r=[dims.get('time',0), dims.get('budget',0), dims.get('param',0), dims.get('payment',0)],
@@ -338,23 +392,18 @@ if submitted:
 
             # === 第三行：核心诱饵 (竞争对手情报) ===
             st.markdown("### 🔒 核心情报数据库 (Intelligence Database)")
-            
             st.markdown("""
             <div class="data-card" style="border:1px dashed #DC2626; background:#FFF5F5;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <div style="color:#991B1B; font-weight:bold;">⚠ 警告：检测到该项目存在高度疑似内定对象</div>
                     <div style="font-size:12px; color:#666;">数据密级：绝密 ★★★</div>
                 </div>
-                
-                <!-- 模拟表格头 -->
                 <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; font-weight:bold; font-size:13px; border-bottom:1px solid #ccc; padding-bottom:5px; margin-bottom:5px;">
                     <div>历史中标单位 (Competitor)</div>
                     <div>中标金额 (Bid Price)</div>
                     <div>下浮率 (Rate)</div>
                     <div>关联度</div>
                 </div>
-                
-                <!-- 模糊数据行 -->
                 <div class="locked-row" style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr;">
                     <div>四川**建设工程有限公司</div>
                     <div class="blur-text">¥ 2,850,000</div>
@@ -373,7 +422,6 @@ if submitted:
                     <div class="blur-text">92.0%</div>
                     <div style="color:#059669; font-weight:bold;">20% (普通)</div>
                 </div>
-                
                 <div style="text-align:center; margin-top:20px;">
                     <p style="font-size:14px; color:#4B5563;">当前账户权限不足，无法查看详细金额及单位全称</p>
                     <button style="width:auto; background:#DC2626; padding:10px 40px; border-radius:50px; font-size:15px;">
@@ -384,50 +432,36 @@ if submitted:
             </div>
             """, unsafe_allow_html=True)
 
-# === 新增：底部实时动态 (真实的系统日志风格) ===
-# 计算一个真实的过去时间 (使用北京时间 UTC+8)
-bj_now = get_beijing_time()
-
-log_time_1 = (bj_now - timedelta(minutes=45)).strftime("%H:%M:%S")
-log_time_2 = (bj_now - timedelta(minutes=12)).strftime("%H:%M:%S")
-log_time_3 = (bj_now - timedelta(minutes=5)).strftime("%H:%M:%S")
-log_time_4 = (bj_now - timedelta(minutes=2)).strftime("%H:%M:%S")
-sync_time = (bj_now - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
-
+# === 新增：底部实时动态 (完全重写的动态日志) ===
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 关键修复：这里的HTML字符串取消了内部缩进，避免被Markdown误判为代码块
-# 同时保持了 unsafe_allow_html=True
+# 生成动态日志HTML字符串
+log_data = get_random_log_data()
+logs_html = ""
+for log in log_data:
+    logs_html += f"""
+    <div class="case-item">
+        <span class="log-time">[{log['time']}]</span> 
+        <span class="log-tag {log['style']}">{log['tag']}</span> 
+        <span>{log['msg']}</span>
+    </div>
+    """
+
+# 渲染底部日志容器
+bj_sync_time = (datetime.utcnow() + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
+
 st.markdown(f"""
 <div class="case-study-box">
-<div style="font-weight:bold; color:#0F172A; margin-bottom:10px; font-size:13px; border-bottom:1px solid #E2E8F0; padding-bottom:5px;">
-📡 实时风险监测日志 (Live Monitor Log) - 北京时间 (CST)
+<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:8px; margin-bottom:10px;">
+    <div style="font-weight:bold; color:#E2E8F0; font-size:14px;">📡 全网实时风险/机会监测 (Live Monitor)</div>
+    <div style="color:#22C55E; font-size:12px;">● Online | Beijing Time (UTC+8)</div>
 </div>
-<div class="case-item">
-<span class="log-time">[{log_time_1}]</span> 
-<span class="log-tag">RISK_BLOCK</span> 
-监测到某地级市政府采购项目包含 3 项隐形排他参数，已触发围标预警。
-</div>
-<div class="case-item">
-<span class="log-time">[{log_time_2}]</span> 
-<span class="log-tag">DATA_SYNC</span> 
-成功同步川渝地区 2,400 条历史中标数据，关联关系库已更新。
-</div>
-<div class="case-item">
-<span class="log-time">[{log_time_3}]</span> 
-<span class="log-tag">AUDIT_PASS</span> 
-某国企施工单位通过“历史低价模型”优化报价，中标率预测提升至 85%。
-</div>
-<div class="case-item">
-<span class="log-time">[{log_time_4}]</span> 
-<span class="log-tag">FUND_WARN</span> 
-系统拦截一份“全额垫资”合同风险，建议客户启动资金风控预案。
-</div>
-<div style="margin-top:10px; font-size:11px; color:#94A3B8; text-align:right;">
-* 数据来源：全国公共资源交易大数据互联中心
+{logs_html}
+<div style="margin-top:10px; font-size:11px; color:#64748B; text-align:right;">
+    * 数据实时同步自：全国公共资源交易平台 / 企查查 / 法院判决文书网
 </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 底部状态 (使用动态北京时间)
-st.markdown(f"<br><hr><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X8829-AF | 数据同步时间: {sync_time} | SSL 安全连接</div>", unsafe_allow_html=True)
+# 底部状态
+st.markdown(f"<br><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X{random.randint(1000,9999)}-AF | 上次数据同步: {bj_sync_time} | SSL 安全加密连接</div>", unsafe_allow_html=True)
