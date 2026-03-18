@@ -181,12 +181,12 @@ with col_tips:
     
     1. **复制**：打开招标公告，复制核心段落。
     2. **粘贴**：将内容粘贴到左侧文本框。
-    3. **扫描**：AI 将在 5 秒内输出体检报告。
+    3. **扫描**：系统 将在 60秒内输出体检报告。
     """)
     st.markdown("""
     <div style="background-color:#262730; padding:15px; border-radius:10px; font-size:14px; color:#888;">
     ⚠️ <b>免责声明：</b><br>
-    本系统基于大语言模型逻辑推理，结果仅供商业决策参考，不构成法律效力。
+    本系统基于大数据模型，结果仅供商业决策参考，不构成法律效力。
     </div>
     """, unsafe_allow_html=True)
 
@@ -276,7 +276,7 @@ if submitted and tender_text:
             st.markdown(f"""
             <div style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
                 <div style="background: #1F2229; padding: 20px; border-radius: 15px; border-left: 5px solid {theme_color};">
-                    <h3 style="margin-top:0;">🤖 AI 犀利点评</h3>
+                    <h3 style="margin-top:0;">🤖 点评</h3>
                     <p style="font-size: 16px; line-height: 1.6;">“{result.get('verdict', '暂无点评')}”</p>
                     <hr style="border-color: #333;">
                     <div style="font-weight: bold; color: {theme_color};">
@@ -319,7 +319,7 @@ if submitted and tender_text:
             <p style="color: #CCC; font-size: 16px;">本报告基于公开文本分析。如需获取<b>【该项目竞争对手历史报价数据】</b>及<b>【详细内定评分标准审计】</b>，请联系人工顾问。</p>
             <div style="margin-top: 20px;">
                 <span style="background: {theme_color}; color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer;">
-                    ¥29.9 / 份深度报告 · 点击联系
+                    ¥59.9 / 份深度报告 · 点击联系
                 </span>
             </div>
         </div>
