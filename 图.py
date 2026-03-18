@@ -19,8 +19,8 @@ st.markdown("""
 <style>
     /* 1. 调整顶部间距，防止标题被遮挡 */
     .block-container {
-        padding-top: 2rem !important; /* 增加顶部间距 */
-        padding-bottom: 1rem !important;
+        padding-top: 2rem !important;
+        padding-bottom: 3rem !important; /* 增加底部留白 */
         padding-left: 2rem !important;
         padding-right: 2rem !important;
     }
@@ -108,6 +108,27 @@ st.markdown("""
         font-size: 13px;
         margin-bottom: 5px;
     }
+
+    /* 9. 底部案例展示区 (新增) */
+    .case-study-box {
+        background: white;
+        border-top: 3px solid #0F172A;
+        padding: 20px;
+        margin-top: 30px;
+        border-radius: 4px;
+    }
+    .case-item {
+        font-size: 13px;
+        color: #334155;
+        border-bottom: 1px dashed #E2E8F0;
+        padding: 8px 0;
+    }
+    .case-tag-win {
+        background: #DCFCE7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;
+    }
+    .case-tag-risk {
+        background: #FEE2E2; color: #991B1B; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -175,7 +196,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 输入区 (修复报错：必须包裹在 st.form 内) ---
+# --- 输入区 ---
 with st.form("audit_form"):
     c1, c2, c3 = st.columns([1.5, 1.5, 1])
     with c1:
@@ -185,7 +206,6 @@ with st.form("audit_form"):
     with c3:
         st.write("") # 占位
         st.write("") 
-        # 按钮必须在 form 内
         submitted = st.form_submit_button("⚡ 立即审计 (Audit)")
     
     tender_text = st.text_area("📄 招标文件摘要 / 采购需求 (粘贴区域)", height=100, placeholder="在此粘贴核心条款，系统将自动进行 NLP 语义分析...")
@@ -300,7 +320,6 @@ if submitted:
             st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
             # === 第三行：核心诱饵 (竞争对手情报) ===
-            # 这是最拿捏人性的地方：假装查到了数据，但是不给你看
             st.markdown("### 🔒 核心情报数据库 (Intelligence Database)")
             
             st.markdown("""
@@ -347,6 +366,41 @@ if submitted:
                 </div>
             </div>
             """, unsafe_allow_html=True)
+
+# === 新增：底部实时动态 (拿捏人性区域) ===
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("""
+<div class="case-study-box">
+    <div style="font-weight:bold; color:#0F172A; margin-bottom:15px; display:flex; align-items:center;">
+        <span style="font-size:20px; margin-right:5px;">📡</span> 实时情报监控中心 (Live Intelligence)
+    </div>
+    
+    <div class="case-item">
+        <span class="case-tag-win">避坑成功</span> 
+        <span style="color:#64748B;">[09:42]</span> 
+        四川XX建筑工程有限公司使用本系统检测出一份<b>“废标陷阱”</b>，成功止损报名费 30,000 元。
+    </div>
+    <div class="case-item">
+        <span class="case-tag-risk">内定预警</span> 
+        <span style="color:#64748B;">[09:35]</span> 
+        系统检测到【若尔盖XX项目】招标文件存在<b>唯一指向性专利参数</b>，判定为内定标，建议放弃。
+    </div>
+    <div class="case-item">
+        <span class="case-tag-win">中标捷报</span> 
+        <span style="color:#64748B;">[09:18]</span> 
+        成都XX文化传媒通过<b>“历史底价分析”</b>功能，以 0.5% 的微弱优势成功中标，利润率提升 12%。
+    </div>
+    <div class="case-item">
+        <span class="case-tag-risk">资金预警</span> 
+        <span style="color:#64748B;">[08:55]</span> 
+        系统拦截一份<b>“背靠背付款”</b>合同风险，帮助客户规避 200 万垫资风险。
+    </div>
+    
+    <div style="margin-top:15px; font-size:12px; color:#94A3B8; text-align:right;">
+        * 数据来源：全国工程招投标大数据互联中心
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # 底部状态
 st.markdown("<br><hr><div style='text-align:center; color:#94A3B8; font-size:11px;'>系统日志 ID: 2026-X8829-AF | 数据同步时间: 2026-03-17 08:32:11 | SSL 安全连接</div>", unsafe_allow_html=True)
